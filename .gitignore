@@ -1,7 +1,6 @@
 # Environment variables
-config.env
+Server/config.env
 
 # Node.js modules
 node_modules/
 
-Server/node_modules/
