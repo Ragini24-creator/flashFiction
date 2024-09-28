@@ -1,0 +1,8 @@
+# Set the default behavior to automatically normalize line endings.
+* text=auto
+
+# Ensure all JavaScript files use LF.
+*.js text eol=lf
+
+# Ensure all Markdown files use LF.
+*.md text eol=lf
