@@ -3,3 +3,5 @@ config.env
 
 # Node.js modules
 node_modules/
+
+Server/node_modules/
