@@ -1,0 +1,44 @@
+const bcrypt = require("bcrypt");
+const jwt = require("jsonwebtoken");
+
+const dotenv = require("dotenv");
+dotenv.config({ path: "./config.env" });
+const secretkey = process.env.JWT_SECRETKEY;
+const jwt_expiry = process.env.JWT_EXPIRESIN;
+
+const passwordHashing = async function (password) {
+  try {
+    const saltRounds = 10;
+    const hash = await bcrypt.hash(password, saltRounds);
+    return hash;
+  } catch (error) {
+    console.log(error.message);
+  }
+};
+
+const comparePassword = async function (password, hashedPassword) {
+  try {
+    return await bcrypt.compare(password, hashedPassword);
+  } catch (error) {
+    console.log(error.message);
+  }
+};
+
+const generateToken = (name, email) => {
+  const payload = {
+    name,
+    email,
+    jwt_expiry,
+  };
+
+  const options = { expiresIn: jwt_expiry };
+
+  const token = jwt.sign(payload, secretkey, options);
+  return token;
+};
+
+module.exports = {
+  passwordHashing,
+  comparePassword,
+  generateToken,
+};

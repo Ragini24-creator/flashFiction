@@ -1,7 +1,7 @@
 const mongoose = require("mongoose");
 
 const userSchema = new mongoose.Schema({
-  name: {
+  Name: {
     type: String,
     required: [true, "please enter you name"],
   },
@@ -19,7 +19,7 @@ const userSchema = new mongoose.Schema({
     required: [true, "Please enter your email id! "],
   },
 
-  passwrd: {
+  password: {
     type: String,
     required: true,
     minlength: 6,
