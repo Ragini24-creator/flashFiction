@@ -1,19 +1,23 @@
 const express = require("express");
-const dotenv = require("dotenv");
-const mongoose = require("mongoose");
 const User = require("./models/userModel");
-// const { type } = require("os");
 const bodyParser = require("body-parser");
+const mongoose = require("mongoose");
 const webSocket = require("ws");
+const http = require("http");
+const dotenv = require("dotenv");
+app.use(bodyParser.json());
 
 const {
   passwordHashing,
   comparePassword,
   generateToken,
 } = require("./utils/hashing+jwt");
+
+// const { type } = require("os");
+
 const app = express();
 
-app.use(bodyParser.json());
+const server = http.createServer(app);
 
 dotenv.config({ path: "./config.env" });
 const DB = process.env.DATABASE.replace(
@@ -32,7 +36,7 @@ mongoose
   });
 
 port = 8000;
-app.listen(port, () => {
+server.listen(port, () => {
   console.log("Server listening!");
 });
 
