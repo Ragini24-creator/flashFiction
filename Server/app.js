@@ -2,10 +2,9 @@ const express = require("express");
 const User = require("./models/userModel");
 const bodyParser = require("body-parser");
 const mongoose = require("mongoose");
-const webSocket = require("ws");
+const WebSocket = require("ws");
 const http = require("http");
 const dotenv = require("dotenv");
-app.use(bodyParser.json());
 
 const {
   passwordHashing,
@@ -17,7 +16,15 @@ const {
 
 const app = express();
 
+app.use(bodyParser.json());
+
 const server = http.createServer(app);
+// Create WebSocket server and bind it to the same HTTP server
+const wss = new WebSocket.Server({ server, path: "/ws" });
+port = 8000;
+server.listen(port, () => {
+  console.log("Server listening!");
+});
 
 dotenv.config({ path: "./config.env" });
 const DB = process.env.DATABASE.replace(
@@ -35,9 +42,33 @@ mongoose
     console.log("DB connection successful!");
   });
 
-port = 8000;
-server.listen(port, () => {
-  console.log("Server listening!");
+const storyContent = [];
+const storyArray = [];
+const clientsConnected = [];
+
+wss.on("connection", (ws) => {
+  clientsConnected.push(ws);
+  console.log("A new connection is established from client side");
+  ws.send(JSON.stringify({ message: "The server is responding back!" }));
+
+  ws.on("message", (message) => {
+    const stringMessage = message.toString();
+    console.log("Client sent a new message: ", stringMessage);
+    storyArray.push(stringMessage);
+    clientsConnected.forEach((client) => {
+      if (client.readyState === WebSocket.OPEN) {
+        ws.send(JSON.stringify(storyArray));
+      }
+    });
+  });
+
+  ws.on("close", (ws) => {
+    console.log("connection closed");
+    const index = clientsConnected.indexOf(ws);
+    if (index > -1) {
+      clientsConnected.splice(index, 1);
+    }
+  });
 });
 
 app.post("/api/v1/user/register", async (req, res) => {
