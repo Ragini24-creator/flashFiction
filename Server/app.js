@@ -5,6 +5,7 @@ const mongoose = require("mongoose");
 const WebSocket = require("ws");
 const http = require("http");
 const dotenv = require("dotenv");
+const cors = require("cors");
 
 const {
   passwordHashing,
@@ -17,7 +18,7 @@ const {
 const app = express();
 
 app.use(bodyParser.json());
-
+app.use(cors());
 const server = http.createServer(app);
 // Create WebSocket server and bind it to the same HTTP server
 const wss = new WebSocket.Server({ server, path: "/ws" });
@@ -45,8 +46,16 @@ mongoose
 const storyContent = [];
 const storyArray = [];
 const clientsConnected = [];
+const clientIpAddresses = [];
 
-wss.on("connection", (ws) => {
+wss.on("connection", (ws, req) => {
+  const ip = req.socket.remoteAddress; // Get the client's IP address
+  const ipv4Address = ip.startsWith("::ffff:") ? ip.slice(7) : ip;
+  console.log(ipv4Address);
+  if (!clientIpAddresses.includes(ipv4Address)) {
+    clientIpAddresses.push(ipv4Address);
+  }
+  console.log(clientIpAddresses);
   clientsConnected.push(ws);
   console.log("A new connection is established from client side");
   ws.send(JSON.stringify({ message: "The server is responding back!" }));
@@ -57,7 +66,7 @@ wss.on("connection", (ws) => {
     storyArray.push(stringMessage);
     clientsConnected.forEach((client) => {
       if (client.readyState === WebSocket.OPEN) {
-        ws.send(JSON.stringify(storyArray));
+        client.send(JSON.stringify(storyArray));
       }
     });
   });
@@ -122,4 +131,8 @@ app.post("/api/v1/user/login", async (req, res) => {
       message: "Internal server error",
     });
   }
+});
+
+app.get("/api/v1/users/active/count", (req, res) => {
+  res.status(200).json({ activeUsers: clientIpAddresses.length });
 });
